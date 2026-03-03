@@ -3,7 +3,7 @@
   "buildCommand": "next build",
   "outputDirectory": ".next",
   "env": {
-    "NEXT_PUBLIC_API_URL": "https://pa-queue-server.onrender.com/api",
+    "NEXT_PUBLIC_API_URL": "https://pa-queue.vercel.app/api",
     "NEXT_PUBLIC_SOCKET_URL": "https://pa-queue-server.onrender.com"
   },
   "rewrites": [
