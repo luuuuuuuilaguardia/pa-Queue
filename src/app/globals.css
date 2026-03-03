@@ -114,6 +114,13 @@ body {
   50% { transform: translateY(-6px); }
 }
 
+/* ---- Responsive: Host Dashboard grid ---- */
+@media (max-width: 768px) {
+  .host-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

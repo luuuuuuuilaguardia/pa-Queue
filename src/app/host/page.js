@@ -56,7 +56,9 @@ export default function HostDashboard() {
                 const socket = connectSocket();
 
                 socket.on('connect', () => {
-                    socket.emit('join-room', { roomCode: roomData.room.code });
+                    if (roomData?.room?.code) {
+                        socket.emit('join-room', { roomCode: roomData.room.code });
+                    }
                 });
 
                 socket.on('queue-update', ({ tracks: updatedTracks }) => {
@@ -93,6 +95,7 @@ export default function HostDashboard() {
 
     // Handle approving a track
     const handleApprove = useCallback(async (track) => {
+        if (!room) return;
         try {
             const socket = connectSocket();
 
@@ -113,6 +116,7 @@ export default function HostDashboard() {
 
     // Handle rejecting a track
     const handleReject = useCallback((track) => {
+        if (!room) return;
         const socket = connectSocket();
         socket.emit('reject-track', {
             roomCode: room.code,
@@ -123,6 +127,7 @@ export default function HostDashboard() {
 
     // Handle closing the room
     const handleCloseRoom = useCallback(async () => {
+        if (!room) return;
         if (!window.confirm('Are you sure you want to close this room?')) return;
 
         try {
@@ -155,9 +160,6 @@ export default function HostDashboard() {
                         margin: '0 auto 16px',
                     }} />
                     <p style={{ color: 'var(--text-secondary)' }}>Setting up your room...</p>
-                    <style jsx>{`
-            @keyframes spin { to { transform: rotate(360deg); } }
-          `}</style>
                 </div>
             </main>
         );
@@ -366,14 +368,6 @@ export default function HostDashboard() {
                 </div>
             </div>
 
-            {/* Responsive override for mobile */}
-            <style jsx>{`
-        @media (max-width: 768px) {
-          div[style*="grid-template-columns"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
         </main>
     );
 }
