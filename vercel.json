@@ -5,5 +5,11 @@
   "env": {
     "NEXT_PUBLIC_API_URL": "https://pa-queue-server.onrender.com/api",
     "NEXT_PUBLIC_SOCKET_URL": "https://pa-queue-server.onrender.com"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://pa-queue-server.onrender.com/api/:path*"
+    }
+  ]
 }
