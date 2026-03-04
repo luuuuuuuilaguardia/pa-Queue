@@ -2,7 +2,7 @@
 // QueueRoom – TrackCard Component
 // ============================================
 // Displays a single track with album art, title,
-// artist, and action buttons (vote, approve, reject).
+// artist, and action buttons (approve, reject, mark played).
 // Used in both Host and Guest views.
 // ============================================
 
@@ -12,21 +12,19 @@
  * TrackCard – Renders a single track suggestion.
  *
  * @param {Object} track - Track data from the database
- * @param {string} mode - 'host' | 'guest' | 'search'
+ * @param {string} mode - 'host' | 'guest' | 'search' | 'history'
  * @param {Function} onApprove - Host: approve callback
  * @param {Function} onReject - Host: reject callback
- * @param {Function} onVote - Guest: upvote callback
+ * @param {Function} onMarkPlayed - Host: mark as played callback
  * @param {Function} onAdd - Search: add to room callback
- * @param {boolean} hasVoted - Whether the current guest has already voted
  */
 export default function TrackCard({
     track,
     mode = 'guest',
     onApprove,
     onReject,
-    onVote,
+    onMarkPlayed,
     onAdd,
-    hasVoted = false,
 }) {
     // Format duration from ms to m:ss
     const formatDuration = (ms) => {
@@ -36,6 +34,8 @@ export default function TrackCard({
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
+    const isHistory = mode === 'history' || track.status === 'played';
+
     return (
         <div
             className="animate-fade-in"
@@ -44,18 +44,25 @@ export default function TrackCard({
                 alignItems: 'center',
                 gap: '14px',
                 padding: '12px 16px',
-                background: 'rgba(255, 255, 255, 0.03)',
+                background: isHistory
+                    ? 'rgba(255, 255, 255, 0.015)'
+                    : 'rgba(255, 255, 255, 0.03)',
                 borderRadius: 'var(--radius-md)',
                 border: '1px solid var(--border-subtle)',
                 transition: 'all 0.25s ease',
                 cursor: 'default',
+                opacity: isHistory ? 0.7 : 1,
             }}
             onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                e.currentTarget.style.background = isHistory
+                    ? 'rgba(255, 255, 255, 0.04)'
+                    : 'rgba(255, 255, 255, 0.06)';
                 e.currentTarget.style.borderColor = 'var(--border-hover)';
             }}
             onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                e.currentTarget.style.background = isHistory
+                    ? 'rgba(255, 255, 255, 0.015)'
+                    : 'rgba(255, 255, 255, 0.03)';
                 e.currentTarget.style.borderColor = 'var(--border-subtle)';
             }}
         >
@@ -72,7 +79,12 @@ export default function TrackCard({
                     <img
                         src={track.albumArt}
                         alt={track.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            filter: isHistory ? 'grayscale(40%)' : 'none',
+                        }}
                     />
                 ) : (
                     <div style={{
@@ -83,7 +95,7 @@ export default function TrackCard({
                         justifyContent: 'center',
                         fontSize: '1.2rem',
                     }}>
-
+                        🎵
                     </div>
                 )}
             </div>
@@ -93,7 +105,7 @@ export default function TrackCard({
                 <p style={{
                     fontWeight: 600,
                     fontSize: '0.95rem',
-                    color: 'var(--text-primary)',
+                    color: isHistory ? 'var(--text-secondary)' : 'var(--text-primary)',
                     margin: 0,
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -103,7 +115,7 @@ export default function TrackCard({
                 </p>
                 <p style={{
                     fontSize: '0.82rem',
-                    color: 'var(--text-secondary)',
+                    color: 'var(--text-muted)',
                     margin: '2px 0 0',
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
@@ -114,51 +126,8 @@ export default function TrackCard({
                 </p>
             </div>
 
-            {/* Vote Count (shown in guest and host mode) */}
-            {mode !== 'search' && track.votes !== undefined && (
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '2px',
-                    minWidth: '40px',
-                }}>
-                    <span style={{
-                        fontSize: '1.1rem',
-                        fontWeight: 700,
-                        color: track.votes > 0 ? 'var(--accent-primary)' : 'var(--text-muted)',
-                    }}>
-                        {track.votes}
-                    </span>
-                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-                        votes
-                    </span>
-                </div>
-            )}
-
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
-                {/* Guest: Upvote */}
-                {mode === 'guest' && onVote && (
-                    <button
-                        onClick={() => onVote(track._id)}
-                        disabled={hasVoted}
-                        style={{
-                            background: hasVoted ? 'rgba(29, 185, 84, 0.15)' : 'rgba(29, 185, 84, 0.1)',
-                            color: hasVoted ? 'var(--text-muted)' : 'var(--accent-primary)',
-                            border: `1px solid ${hasVoted ? 'transparent' : 'rgba(29, 185, 84, 0.3)'}`,
-                            borderRadius: 'var(--radius-full)',
-                            padding: '6px 14px',
-                            cursor: hasVoted ? 'default' : 'pointer',
-                            fontSize: '0.8rem',
-                            fontWeight: 600,
-                            transition: 'all 0.2s ease',
-                        }}
-                    >
-                        {hasVoted ? '✓ Voted' : '▲ Vote'}
-                    </button>
-                )}
-
                 {/* Search: Add to Room */}
                 {mode === 'search' && onAdd && (
                     <button
@@ -184,9 +153,47 @@ export default function TrackCard({
                     </button>
                 )}
 
-                {/* Status badge for approved tracks */}
-                {track.status === 'approved' && mode === 'host' && (
+                {/* Host: Mark Played (on approved tracks) */}
+                {mode === 'host' && track.status === 'approved' && onMarkPlayed && (
+                    <button
+                        onClick={() => onMarkPlayed(track)}
+                        style={{
+                            background: 'rgba(124, 58, 237, 0.15)',
+                            color: 'var(--accent-purple)',
+                            border: '1px solid rgba(124, 58, 237, 0.3)',
+                            borderRadius: 'var(--radius-full)',
+                            padding: '6px 14px',
+                            cursor: 'pointer',
+                            fontSize: '0.8rem',
+                            fontWeight: 600,
+                            transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(124, 58, 237, 0.25)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(124, 58, 237, 0.15)';
+                        }}
+                    >
+                        ♪ Played
+                    </button>
+                )}
+
+                {/* Status badge for approved tracks in guest mode */}
+                {track.status === 'approved' && (mode === 'guest') && (
                     <span className="badge badge-approved">✓ Queued</span>
+                )}
+
+                {/* Played indicator for history tracks in guest/history mode */}
+                {isHistory && mode !== 'host' && (
+                    <span style={{
+                        fontSize: '0.72rem',
+                        color: 'var(--text-muted)',
+                        fontWeight: 500,
+                        alignSelf: 'center',
+                    }}>
+                        ♪ Played
+                    </span>
                 )}
             </div>
         </div>

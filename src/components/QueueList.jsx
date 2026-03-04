@@ -2,8 +2,9 @@
 // QueueRoom – QueueList Component
 // ============================================
 // Displays a titled list of tracks with a header
-// badge showing the count. Used for "Pending" and
-// "Approved" sections in both Host and Guest views.
+// badge showing the count. Used for "Pending",
+// "Approved", and "History" sections in both
+// Host and Guest views.
 // ============================================
 
 'use client';
@@ -13,14 +14,13 @@ import TrackCard from './TrackCard';
 /**
  * QueueList – Renders a section of tracks with a title.
  *
- * @param {string} title - Section title (e.g., "Pending Suggestions")
+ * @param {string} title - Section title
  * @param {Array} tracks - Array of track objects
- * @param {string} mode - 'host' | 'guest'
- * @param {string} badgeType - 'pending' | 'approved'
+ * @param {string} mode - 'host' | 'guest' | 'history'
+ * @param {string} badgeType - 'pending' | 'approved' | 'history'
  * @param {Function} onApprove - Host approve callback
  * @param {Function} onReject - Host reject callback
- * @param {Function} onVote - Guest vote callback
- * @param {Array} votedTrackIds - Array of track IDs the guest has voted on
+ * @param {Function} onMarkPlayed - Host mark-as-played callback
  * @param {string} emptyMessage - Message when list is empty
  */
 export default function QueueList({
@@ -30,8 +30,7 @@ export default function QueueList({
     badgeType = 'pending',
     onApprove,
     onReject,
-    onVote,
-    votedTrackIds = [],
+    onMarkPlayed,
     emptyMessage = 'No tracks yet',
 }) {
     return (
@@ -71,8 +70,7 @@ export default function QueueList({
                                 mode={mode}
                                 onApprove={onApprove}
                                 onReject={onReject}
-                                onVote={onVote}
-                                hasVoted={votedTrackIds.includes(track._id)}
+                                onMarkPlayed={onMarkPlayed}
                             />
                         </div>
                     ))}

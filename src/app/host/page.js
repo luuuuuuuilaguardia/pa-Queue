@@ -29,10 +29,12 @@ export default function HostDashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [notification, setNotification] = useState('');
+    const [autoAccept, setAutoAccept] = useState(false);
 
     // Derived track lists
     const pendingTracks = tracks.filter((t) => t.status === 'pending');
     const approvedTracks = tracks.filter((t) => t.status === 'approved');
+    const historyTracks = tracks.filter((t) => t.status === 'played');
 
     // Show a temporary notification
     const showNotification = useCallback((msg) => {
@@ -71,6 +73,16 @@ export default function HostDashboard() {
 
                 socket.on('room-error', ({ message }) => {
                     setError(message);
+                });
+
+                // Auto-accepted track – push to Spotify immediately
+                socket.on('track-auto-approved', async ({ track }) => {
+                    try {
+                        await pushToSpotifyQueue(track.spotifyUri, roomData.room.code);
+                        showNotification(`⚡ "${track.title}" auto-added to Spotify!`);
+                    } catch (err) {
+                        console.error('Auto-approve Spotify push failed:', err.message);
+                    }
                 });
 
                 setLoading(false);
@@ -124,6 +136,33 @@ export default function HostDashboard() {
         });
         showNotification(`✕ "${track.title}" rejected`);
     }, [room, showNotification]);
+
+    // Handle marking a track as played (moves it to history)
+    const handleMarkPlayed = useCallback((track) => {
+        if (!room) return;
+        const socket = connectSocket();
+        socket.emit('mark-played', {
+            roomCode: room.code,
+            trackId: track._id,
+        });
+        showNotification(`♪ "${track.title}" moved to history`);
+    }, [room, showNotification]);
+
+    // Toggle auto-accept mode
+    const handleToggleAutoAccept = useCallback(() => {
+        if (!room) return;
+        const socket = connectSocket();
+        const newValue = !autoAccept;
+        setAutoAccept(newValue);
+        socket.emit('toggle-auto-accept', {
+            roomCode: room.code,
+            enabled: newValue,
+        });
+        showNotification(newValue
+            ? '⚡ Auto-accept ON – suggestions go straight to queue'
+            : '✋ Auto-accept OFF – you must approve suggestions'
+        );
+    }, [room, autoAccept, showNotification]);
 
     // Handle closing the room
     const handleCloseRoom = useCallback(async () => {
@@ -337,6 +376,76 @@ export default function HostDashboard() {
                                 {guestCount === 1 ? 'Guest Connected' : 'Guests Connected'}
                             </p>
                         </div>
+
+                        {/* Auto-Accept Toggle */}
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '16px',
+                            background: autoAccept
+                                ? 'rgba(29, 185, 84, 0.08)'
+                                : 'rgba(255, 255, 255, 0.04)',
+                            borderRadius: 'var(--radius-md)',
+                            border: `1px solid ${autoAccept ? 'rgba(29, 185, 84, 0.3)' : 'var(--border-subtle)'}`,
+                            transition: 'all 0.3s ease',
+                        }}>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                marginBottom: '8px',
+                            }}>
+                                <p style={{
+                                    fontSize: '0.78rem',
+                                    color: 'var(--text-muted)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.1em',
+                                    fontWeight: 600,
+                                    margin: 0,
+                                }}>
+                                    Auto-Accept
+                                </p>
+                                {/* Toggle Switch */}
+                                <button
+                                    onClick={handleToggleAutoAccept}
+                                    style={{
+                                        position: 'relative',
+                                        width: '44px',
+                                        height: '24px',
+                                        borderRadius: 'var(--radius-full)',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        background: autoAccept
+                                            ? 'var(--accent-primary)'
+                                            : 'rgba(255, 255, 255, 0.15)',
+                                        transition: 'background 0.3s ease',
+                                        padding: 0,
+                                        flexShrink: 0,
+                                    }}
+                                    aria-label="Toggle auto-accept"
+                                >
+                                    <span style={{
+                                        position: 'absolute',
+                                        top: '3px',
+                                        left: autoAccept ? '23px' : '3px',
+                                        width: '18px',
+                                        height: '18px',
+                                        borderRadius: '50%',
+                                        background: '#fff',
+                                        transition: 'left 0.25s ease',
+                                    }} />
+                                </button>
+                            </div>
+                            <p style={{
+                                fontSize: '0.75rem',
+                                color: autoAccept ? 'var(--accent-primary)' : 'var(--text-muted)',
+                                margin: 0,
+                                lineHeight: 1.4,
+                            }}>
+                                {autoAccept
+                                    ? '⚡ Suggestions are auto-queued to Spotify'
+                                    : 'You manually approve each suggestion'}
+                            </p>
+                        </div>
                     </aside>
 
                     {/* Right Content – Queues */}
@@ -355,13 +464,25 @@ export default function HostDashboard() {
                         </div>
 
                         {/* Approved Queue */}
-                        <div className="glass-card" style={{ padding: '24px' }}>
+                        <div className="glass-card" style={{ padding: '24px', marginBottom: '20px' }}>
                             <QueueList
                                 title="Approved Queue"
                                 tracks={approvedTracks}
                                 mode="host"
                                 badgeType="approved"
+                                onMarkPlayed={handleMarkPlayed}
                                 emptyMessage="No approved tracks yet. Approve suggestions above!"
+                            />
+                        </div>
+
+                        {/* History */}
+                        <div className="glass-card" style={{ padding: '24px' }}>
+                            <QueueList
+                                title="History"
+                                tracks={historyTracks}
+                                mode="history"
+                                badgeType="history"
+                                emptyMessage="No played tracks yet. Mark approved tracks as played to see them here."
                             />
                         </div>
                     </div>
