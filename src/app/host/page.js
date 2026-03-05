@@ -162,8 +162,8 @@ export default function HostDashboard() {
             enabled: newValue,
         });
         showNotification(newValue
-            ? '⚡ Auto-accept ON – suggestions go straight to queue'
-            : '✋ Auto-accept OFF – you must approve suggestions'
+            ? 'Auto-accept ON – suggestions go straight to queue'
+            : 'Auto-accept OFF – you must approve suggestions'
         );
     }, [room, autoAccept, showNotification]);
 
