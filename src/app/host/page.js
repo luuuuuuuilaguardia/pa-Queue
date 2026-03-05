@@ -18,6 +18,7 @@ import { connectSocket, disconnectSocket } from '@/lib/socket';
 import QueueList from '@/components/QueueList';
 import QRCode from '@/components/QRCode';
 import NowPlaying from '@/components/NowPlaying';
+import CrossfadePlayer from '@/components/CrossfadePlayer';
 
 export default function HostDashboard() {
     const router = useRouter();
@@ -31,6 +32,7 @@ export default function HostDashboard() {
     const [error, setError] = useState('');
     const [notification, setNotification] = useState('');
     const [autoAccept, setAutoAccept] = useState(false);
+    const [djMode, setDjMode] = useState(false);
 
     // Derived track lists
     const pendingTracks = tracks.filter((t) => t.status === 'pending');
@@ -264,6 +266,23 @@ export default function HostDashboard() {
                                 </span>
                             </div>
                         )}
+                        {/* DJ Mode Toggle */}
+                        <button
+                            onClick={() => setDjMode((d) => !d)}
+                            style={{
+                                padding: '8px 16px',
+                                borderRadius: 'var(--radius-full)',
+                                border: `1px solid ${djMode ? '#a855f7' : 'var(--border-subtle)'}`,
+                                background: djMode ? 'rgba(168,85,247,0.15)' : 'transparent',
+                                color: djMode ? '#a855f7' : 'var(--text-secondary)',
+                                fontWeight: 700,
+                                fontSize: '0.82rem',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            🎧 {djMode ? 'DJ Mode ON' : 'DJ Mode'}
+                        </button>
                         <button className="btn-danger" onClick={handleCloseRoom}>
                             Close Room
                         </button>
@@ -451,8 +470,15 @@ export default function HostDashboard() {
 
                     {/* Right Content – Queues */}
                     <div>
-                        {/* Live Player */}
-                        {room?.code && <NowPlaying roomCode={room.code} />}
+                        {/* Live Player / DJ Mode */}
+                        {room?.code && (
+                            djMode
+                                ? <CrossfadePlayer
+                                    approvedTracks={approvedTracks}
+                                    onMarkPlayed={handleMarkPlayed}
+                                  />
+                                : <NowPlaying roomCode={room.code} />
+                        )}
 
                         {/* Pending Suggestions */}
                         <div className="glass-card" style={{ padding: '24px', marginBottom: '20px' }}>

@@ -82,4 +82,11 @@ export const pushToSpotifyQueue = (trackUri, roomCode) =>
 export const getNowPlaying = (roomCode) =>
     apiFetch(`/spotify/now-playing?roomCode=${roomCode}`);
 
+/**
+ * Get a valid Spotify access token for the current (host) user.
+ * Used by the Web Playback SDK to authenticate.
+ */
+export const getSpotifyAccessToken = () =>
+    apiFetch('/spotify/access-token');
+
 export default apiFetch;
