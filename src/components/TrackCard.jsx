@@ -175,7 +175,7 @@ export default function TrackCard({
                             e.currentTarget.style.background = 'rgba(124, 58, 237, 0.15)';
                         }}
                     >
-                        ♪ Played
+                        Played
                     </button>
                 )}
 
@@ -192,7 +192,7 @@ export default function TrackCard({
                         fontWeight: 500,
                         alignSelf: 'center',
                     }}>
-                        ♪ Played
+                        Played
                     </span>
                 )}
             </div>
