@@ -4,8 +4,7 @@
 // Mobile-first page for guests:
 //   - Search for songs via Spotify
 //   - Add suggestions to the room queue
-//   - View pending & approved tracks
-//   - Upvote pending suggestions
+//   - View pending, approved & played tracks
 //   - Real-time updates via Socket.io
 // ============================================
 
@@ -34,13 +33,13 @@ export default function GuestRoomPage({ params }) {
     const [guestCount, setGuestCount] = useState(0);
     const [error, setError] = useState('');
     const [guestId] = useState(() => `guest_${Math.random().toString(36).substring(2, 10)}`);
-    const [votedTrackIds, setVotedTrackIds] = useState([]);
     const [roomName, setRoomName] = useState('');
     const [notification, setNotification] = useState('');
 
     // Derived track lists
     const pendingTracks = tracks.filter((t) => t.status === 'pending');
     const approvedTracks = tracks.filter((t) => t.status === 'approved');
+    const historyTracks = tracks.filter((t) => t.status === 'played');
 
     // Connect to room via Socket.io
     useEffect(() => {
@@ -104,17 +103,6 @@ export default function GuestRoomPage({ params }) {
         setTimeout(() => setNotification(''), 2500);
         // Remove from search results to avoid double-add
         setSearchResults((prev) => prev.filter((t) => t.spotifyTrackId !== track.spotifyTrackId));
-    }, [roomCode, guestId]);
-
-    // Upvote a track
-    const handleVote = useCallback((trackId) => {
-        const socket = connectSocket();
-        socket.emit('vote-track', {
-            roomCode,
-            trackId,
-            guestId,
-        });
-        setVotedTrackIds((prev) => [...prev, trackId]);
     }, [roomCode, guestId]);
 
     return (
@@ -312,19 +300,27 @@ export default function GuestRoomPage({ params }) {
                         tracks={pendingTracks}
                         mode="guest"
                         badgeType="pending"
-                        onVote={handleVote}
-                        votedTrackIds={votedTrackIds}
                         emptyMessage="No suggestions yet. Be the first!"
                     />
                 </section>
 
-                <section className="glass-card" style={{ padding: '20px' }}>
+                <section className="glass-card" style={{ padding: '20px', marginBottom: '16px' }}>
                     <QueueList
                         title="Up Next"
                         tracks={approvedTracks}
                         mode="guest"
                         badgeType="approved"
                         emptyMessage="No tracks approved yet."
+                    />
+                </section>
+
+                <section className="glass-card" style={{ padding: '20px' }}>
+                    <QueueList
+                        title="History"
+                        tracks={historyTracks}
+                        mode="history"
+                        badgeType="history"
+                        emptyMessage="No played tracks yet."
                     />
                 </section>
 
