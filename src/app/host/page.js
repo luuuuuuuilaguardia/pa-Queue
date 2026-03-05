@@ -17,6 +17,7 @@ import { getCurrentUser, createRoom, pushToSpotifyQueue, closeRoom } from '@/lib
 import { connectSocket, disconnectSocket } from '@/lib/socket';
 import QueueList from '@/components/QueueList';
 import QRCode from '@/components/QRCode';
+import NowPlaying from '@/components/NowPlaying';
 
 export default function HostDashboard() {
     const router = useRouter();
@@ -450,6 +451,9 @@ export default function HostDashboard() {
 
                     {/* Right Content – Queues */}
                     <div>
+                        {/* Live Player */}
+                        {room?.code && <NowPlaying roomCode={room.code} />}
+
                         {/* Pending Suggestions */}
                         <div className="glass-card" style={{ padding: '24px', marginBottom: '20px' }}>
                             <QueueList

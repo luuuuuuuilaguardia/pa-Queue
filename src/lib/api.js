@@ -78,4 +78,8 @@ export const pushToSpotifyQueue = (trackUri, roomCode) =>
         body: JSON.stringify({ trackUri, roomCode }),
     });
 
+/** Get the currently playing track on the host's Spotify */
+export const getNowPlaying = (roomCode) =>
+    apiFetch(`/spotify/now-playing?roomCode=${roomCode}`);
+
 export default apiFetch;
