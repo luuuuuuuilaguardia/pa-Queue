@@ -1,7 +1,7 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "QueueRoom – Collaborative Event Music",
+  title: "pa-Queue – Collaborative Event Music",
   description: "Let your guests suggest and vote on songs in real-time. A collaborative music layer over Spotify for events, parties, and gatherings.",
   keywords: "music, spotify, collaborative, queue, event, party, DJ",
 };
