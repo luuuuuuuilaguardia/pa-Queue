@@ -17,6 +17,7 @@ import { connectSocket, disconnectSocket } from '@/lib/socket';
 import SearchBar from '@/components/SearchBar';
 import TrackCard from '@/components/TrackCard';
 import QueueList from '@/components/QueueList';
+import NowPlaying from '@/components/NowPlaying';
 
 export default function GuestRoomPage({ params }) {
     const { code } = use(params);
@@ -247,6 +248,9 @@ export default function GuestRoomPage({ params }) {
                         </button>
                     </div>
                 )}
+
+                {/* ---- Live Player ---- */}
+                {roomJoined && <NowPlaying roomCode={roomCode} />}
 
                 {/* ---- Search Section ---- */}
                 <section className="glass-card" style={{
