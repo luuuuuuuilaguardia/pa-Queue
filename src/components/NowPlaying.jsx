@@ -101,6 +101,7 @@ export default function NowPlaying({ roomCode }) {
                                 borderRadius: '2px',
                                 background: 'var(--accent-primary)',
                                 height: track?.isPlaying ? `${6 + i * 3}px` : '4px',
+<<<<<<< HEAD
                                 animation: track?.isPlaying ? `eq-bar-${i} 0.${5 + i}s ease-in-out infinite alternate` : 'none',
                                 transition: 'height 0.3s ease',
                             }}
@@ -232,10 +233,18 @@ export default function NowPlaying({ roomCode }) {
                     textAlign: 'center',
                     padding: '12px 0',
                 }}>
+<<<<<<< HEAD
                     Open Spotify on the host&apos;s device to start playing.
                 </p>
             )}
 
+=======
+                    Open Spotify on the host's device to start playing.
+                </p>
+            )}
+
+            {/* Keyframes injected inline (no extra CSS file needed) */}
+>>>>>>> fa685ee1ca04fae4a874c90a4cc529a92f88a291
             <style>{`
                 @keyframes eq-bar-1 { from { height: 4px } to { height: 10px } }
                 @keyframes eq-bar-2 { from { height: 7px } to { height: 14px } }
